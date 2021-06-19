@@ -1,0 +1,9 @@
+If you want to run this program, follow these steps:
+1. Compile GPU SIM, ispass 2009 and popnet.
+2. Use compile.sh in the ./Source_Code/workspace to compile, which use GCC to compile.C files in the workspace folder, named s (starter.c), C (controller.c), C2 (controller2.c), P2 (popnet_trans2.c). 
+You can choose to use C (controller.c) or C2 (controller. c) by changing the relevant code in gpgpu-sim_distribution-master/src/gpgpu-sim/l2cache.cc. 
+3. Run with the following command:
+./S application name topology name
+For example:
+./S AES BFS MM mesh
+
