@@ -51,6 +51,13 @@
 #include <unistd.h>
 #include <sstream>
 
+#include<stdio.h>
+#include<stdlib.h>
+#include<time.h>
+#include <sys/file.h>
+#include <string.h>
+#define MEM_SIZE 100
+
 using namespace std;
 mem_fetch * partition_mf_allocator::alloc(new_addr_type addr, mem_access_type type, unsigned size, bool wr ) const 
 {
@@ -251,8 +258,10 @@ void memory_partition_unit::dram_cycle()
 		string readtxt_chipID;
 		int count=0;
 		ifstream fin;
-		fin.open("../../../workspace/pidChipMap.txt",ios::in);
-		string cmd="cd ../../../workspace &&  ./C2 ";
+		fin.open("/home/ccw/Chiplet_GPGPU-Sim_SharedMemory/benchmark/ispass2009-benchmarks-master/MM/pidChipMap.txt",ios::in);
+        // if (fin.is_open())
+        //     printf("fin is open!!!!!!!!!\n");
+		string cmd="/home/ccw/Chiplet_GPGPU-Sim_SharedMemory/benchmark/ispass2009-benchmarks-master/MM/C ";
 		int sys_mark=0;
 
 		
@@ -261,7 +270,7 @@ void memory_partition_unit::dram_cycle()
 			++count;
 		        if(chipID==readtxt_chipID){
 				ifstream fin2;
-				fin2.open("../../../workspace/chipID.txt",ios::in);
+				fin2.open("/home/ccw/Chiplet_GPGPU-Sim_SharedMemory/benchmark/ispass2009-benchmarks-master/MM/chipID.txt",ios::in);
 				string readtxt_chipID2;
 				int count2=0;
 				string blank=" ";
@@ -292,12 +301,19 @@ void memory_partition_unit::dram_cycle()
 						int each_count=0;
 	
 						ifstream fin3;
-						fin3.open("../../../workspace/memory.txt",ios::in);
+						fin3.open("/home/ccw/Chiplet_GPGPU-Sim_SharedMemory/benchmark/ispass2009-benchmarks-master/MM/memory.txt",ios::in);
 						string memory_trace;
 
 						while(getline(fin3,memory_trace)){
+                            // if (strlen(memory_trace.c_str())<=5)
+                            //     break;
 							++each_count;
 							vector<string> AllStr = split(memory_trace," ");
+                            // for (vector<string>::iterator iter = AllStr.begin(); iter != AllStr.end(); ++iter)
+                            //     cout << *iter << ' ';
+                            // cout << AllStr.size() << endl;
+                            if (AllStr.size() != 6)
+                                break;
 							int mem_chipID=atoi(AllStr[3].c_str())*10+atoi(AllStr[4].c_str());
 							int readtxt_chipID2_int=atoi(readtxt_chipID2.c_str());
 							if(mem_chipID==readtxt_chipID2_int){
@@ -309,7 +325,7 @@ void memory_partition_unit::dram_cycle()
 								line_count.push_back(each_count);
 								if(sys_mark){
 									char* chr_cmd = const_cast<char*>(cmd.c_str());
-									
+									// cout << "read cmd = " << chr_cmd << endl;
 									system(chr_cmd);
 								}								
 							}
@@ -319,7 +335,7 @@ void memory_partition_unit::dram_cycle()
 						
 						for(int i=0;i<line_count.size();++i){
 							char cmd[256];
-							sprintf(cmd,"sed -i '%dd' ../../../workspace/memory.txt",line_count[i]);
+							sprintf(cmd,"sed -i '%dd' /home/ccw/Chiplet_GPGPU-Sim_SharedMemory/benchmark/ispass2009-benchmarks-master/MM/memory.txt",line_count[i]);
 							system(cmd);
 						}
 	
@@ -327,11 +343,11 @@ void memory_partition_unit::dram_cycle()
 						break;
 					}	
 				}
-				
+				fin2.close();
 				break;			
 			}
     		}
-		
+		fin.close();
 		/***********************************************************/
                 
 		m_arbitration_metadata.return_credit(dest_spid); 
@@ -362,7 +378,7 @@ void memory_partition_unit::dram_cycle()
 		/********************************************/
 		
 		ifstream fin_delay;
-		fin_delay.open("../../../workspace/delay_of_chiplet.txt",ios::in);
+		fin_delay.open("/home/ccw/Chiplet_GPGPU-Sim_SharedMemory/benchmark/ispass2009-benchmarks-master/MM/delay_of_chiplet.txt",ios::in);
 		string popnet_delay_string;
 		double popnet_delay_double;
 		getline(fin_delay,popnet_delay_string);
@@ -383,14 +399,14 @@ void memory_partition_unit::dram_cycle()
 		string readtxt_chipID;
 		int count=0;
 		ifstream fin;
-		fin.open("../../../workspace/pidChipMap.txt",ios::in);
-		string cmd="cd ../../../workspace &&  ./C2 ";
+		fin.open("/home/ccw/Chiplet_GPGPU-Sim_SharedMemory/benchmark/ispass2009-benchmarks-master/MM/pidChipMap.txt",ios::in);
+		string cmd="/home/ccw/Chiplet_GPGPU-Sim_SharedMemory/benchmark/ispass2009-benchmarks-master/MM/C ";
 		int sys_mark=0;
 		while(getline(fin,readtxt_chipID)) { 
 			++count;
 		        if(chipID==readtxt_chipID){
 				ifstream fin2;
-				fin2.open("../../../workspace/chipID.txt",ios::in);
+				fin2.open("/home/ccw/Chiplet_GPGPU-Sim_SharedMemory/benchmark/ispass2009-benchmarks-master/MM/chipID.txt",ios::in);
 				string readtxt_chipID2;
 				int count2=0;
 				string blank=" ";
@@ -416,19 +432,20 @@ void memory_partition_unit::dram_cycle()
 						break;
 					}	
 				}
-				
+				fin2.close();
 				break;			
 			}
     		}
 		if(sys_mark){
 			char* chr_cmd = const_cast<char*>(cmd.c_str());
-			
+			// cout << "write cmd = " << chr_cmd << endl;
 			system(chr_cmd);
 		}
-	
+		fin.close();
 		/***********************************************************/
 		//cout<<popnet_delay_double<<endl;
                 d.ready_cycle = gpu_sim_cycle+gpu_tot_sim_cycle + m_config->dram_latency+popnet_delay_double;
+		//d.ready_cycle = gpu_sim_cycle+gpu_tot_sim_cycle + m_config->dram_latency;
                 m_dram_latency_queue.push_back(d);
                 mf->set_status(IN_PARTITION_DRAM_LATENCY_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                 m_arbitration_metadata.borrow_credit(spid); 

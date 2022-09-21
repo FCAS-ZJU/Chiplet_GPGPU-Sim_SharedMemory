@@ -242,11 +242,11 @@ void sim_foundation::simulation_results()
 	cout<<"**************************************************"<<endl;
 	
 	ofstream fout;
-	fout.open("../workspace/delay_of_chiplet.txt",ios::out);
+	fout.open("/home/ccw/Chiplet_GPGPU-Sim_SharedMemory/benchmark/ispass2009-benchmarks-master/MM/delay_of_chiplet.txt",ios::out);
 	if(!(x_isnan(total_delay/tot_f_t)))
 		fout<<total_delay/tot_f_t<<endl;
 	fout.close();
-	system("cat ../workspace/delay_of_chiplet.txt >> ../workspace/delay_record.txt");
+	system("cat /home/ccw/Chiplet_GPGPU-Sim_SharedMemory/benchmark/ispass2009-benchmarks-master/MM/delay_of_chiplet.txt >> /home/ccw/Chiplet_GPGPU-Sim_SharedMemory/benchmark/ispass2009-benchmarks-master/MM/delay_record.txt");
 }
 
 //***************************************************************************//

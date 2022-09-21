@@ -37,7 +37,7 @@ int readChipID(int chipID[]){
 		fclose(fp_in); 		
      		flock(fileno(fp_in), LOCK_UN);
 	}
-    
+   	return 1; 
 
 
 }
@@ -53,8 +53,9 @@ int bench_WriteFile(char *fileName,char*stringLine){
      		fclose(fp_out);
 	     	flock(fileno(fp_out), LOCK_UN);
 	}
+	return 1;
 }
-inline int popnet_traceTransfer(int numOfChip){
+int popnet_traceTransfer(int numOfChip){
 	
 	int chipID[numOfChip];	
 	readChipID(chipID);
@@ -100,14 +101,14 @@ inline int popnet_traceTransfer(int numOfChip){
 		}
 		
 		system("sort -n -k 1 bench -o bench");
-		system("cp bench ./benchtrace/ && cp -r ./benchtrace ../popnet-master && ../popnet-master/popnet -A 4 -c 2 -V 3 -B 12 -O 12 -F 4 -L 1000 -T 20000 -r 1 -I ../popnet-master/benchtrace/bench -R 0");
+		system("cp bench ./benchtrace/ && cp -r ./benchtrace /home/ccw/Chiplet_GPGPU-Sim_SharedMemory/SourceCode/popnet-master && /home/ccw/Chiplet_GPGPU-Sim_SharedMemory/SourceCode/popnet-master/popnet -A 4 -c 2 -V 3 -B 12 -O 12 -F 4 -L 1000 -T 20000 -r 1 -I /home/ccw/Chiplet_GPGPU-Sim_SharedMemory/SourceCode/popnet-master/benchtrace/bench -R 0");
 		
-		system("rm -rf ../workspace/benchtrace");
+		system("rm -rf /home/ccw/Chiplet_GPGPU-Sim_SharedMemory/benchmark/ispass2009-benchmarks-master/MM/benchtrace");
 		
 		fclose(fp_in);
 	     	flock(fileno(fp_in), LOCK_UN);
 	}
-    	
+    	return 1;
 }
 int fileRowCount(char * file_name){
   FILE *fp;
@@ -170,9 +171,9 @@ if (0 == flock(fileno(fp_in), LOCK_EX)){
 void synchronization(float time,char * chipID,int numOfChip){
 
 	
-	char filename_string[64];
-	char time_string[10];
-	strcpy (filename_string,"../workspace/synchronization/");
+	char filename_string[128];
+	//char time_string[10];
+	strcpy (filename_string,"/home/ccw/Chiplet_GPGPU-Sim_SharedMemory/benchmark/ispass2009-benchmarks-master/MM/synchronization/");
 	int time_int=(int)time;
 
 	/*sprintf(time_string, "%d", time_int/1000);
@@ -237,7 +238,7 @@ void synchronization(float time,char * chipID,int numOfChip){
 		}
 		//printf("%d\t%d\t%d\t%d\n",now_time,syn_time,row,numOfChip);
 	}
-	system("cd ../workspace/synchronization && rm ../workspace/synchronization/synchronization.txt && touch ../workspace/synchronization/synchronization.txt");
+	system("cd /home/ccw/Chiplet_GPGPU-Sim_SharedMemory/benchmark/ispass2009-benchmarks-master/MM/synchronization && rm /home/ccw/Chiplet_GPGPU-Sim_SharedMemory/benchmark/ispass2009-benchmarks-master/MM/synchronization/synchronization.txt && touch /home/ccw/Chiplet_GPGPU-Sim_SharedMemory/benchmark/ispass2009-benchmarks-master/MM/synchronization/synchronization.txt");
 	char string_newSynTime[10];
 	
 	sprintf(string_newSynTime, "%d", syn_time+2000);
@@ -312,9 +313,20 @@ int trace_writeFile(int inputChipID, int outputChipID,int time,char * file_name)
 		fclose(fp_out);
 		flock(fileno(fp_out), LOCK_UN);
 	}
+	return 1;
 }
 
-
+void write_to_prememory() {
+	FILE * fp_out;
+	int writeFail_flag;
+	if ((fp_out = fopen(("/home/ccw/Chiplet_GPGPU-Sim_SharedMemory/benchmark/ispass2009-benchmarks-master/MM/pre_memory.txt"), "a")) == NULL)
+      	writeFail_flag=1;
+	if (0 == flock(fileno(fp_out), LOCK_EX)){
+		system("tail -1 bench >> pre_memory.txt");
+		fclose(fp_out);
+		flock(fileno(fp_out), LOCK_UN);
+	}
+}
 
 /*argv[1] is the chip ID, argv[2] is the time, argv[3] is read or write*/
 /*The chip ID is obtained by the process ID*/
@@ -327,7 +339,7 @@ int main(int argc,char * argv[]){
 	int chipID[numOfChip];	
 	readChipID(chipID);
 
-	int inputChipID,outputChipID;
+	int inputChipID,outputChipID = 0;
 	
 	if(readOrWrite==1){
 		inputChipID=atoi(argv[1]);
@@ -349,12 +361,12 @@ int main(int argc,char * argv[]){
 	system("sort -n -k 1 bench -o bench");
 	char cmd[256];
 	if(readOrWrite==1){
-		system("tail -1 bench >> pre_memory.txt");
+		write_to_prememory();
 	}
 	sprintf(cmd,"tail -%d pre_memory.txt > memory.txt", MEM_SIZE);
 	system(cmd);
-	int pop_mark;    
+	//int pop_mark;    
 	synchronization(time,argv[1],numOfChip);
-	
+	return argc;
     
 }

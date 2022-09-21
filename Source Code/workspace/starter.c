@@ -4,7 +4,7 @@
 #include<string.h>
 #include <sys/types.h>
 #include <dirent.h>
-inline void popnet_trans(int argc,char * argv[]){
+void popnet_trans(int argc,char * argv[]){
 	char cmd[512]="nohup ./P ";
 	int i;
 	
@@ -16,7 +16,7 @@ inline void popnet_trans(int argc,char * argv[]){
 	system(cmd);	
 	
 }
-inline void Mesh_chipID_writeFile(int size){
+void Mesh_chipID_writeFile(int size){
 	FILE * fp_out;
 	if((fp_out=fopen("chipID.txt","a"))==NULL){
 		printf("Cannot open this file");
@@ -42,7 +42,7 @@ inline void Mesh_chipID_writeFile(int size){
 
 }
 
-inline void One_punch_chipID_writeFile(int size){
+void One_punch_chipID_writeFile(int size){
 	FILE * fp_out;
 	if((fp_out=fopen("chipID.txt","a"))==NULL){
 		printf("Cannot open this file");
@@ -170,7 +170,7 @@ int i=1;
 
  for (; i < argc; i++){
 	if (strcmp("AES",argv[i])==0)
-        system("cd ../ispass2009-benchmarks-master/AES &&  nohup ../ispass2009-benchmarks-master/bin/release/AES e 256 ../ispass2009-benchmarks-master/AES/data/key256.txt ../ispass2009-benchmarks-master/AES/data/key256.txt &");
+        system("cd /home/ccw/Chiplet_GPGPU-Sim_SharedMemory/benchmark/ispass2009-benchmarks-master/AES &&  nohup /home/ccw/Chiplet_GPGPU-Sim_SharedMemory/benchmark/ispass2009-benchmarks-master/bin/release/AES e 256 /home/ccw/Chiplet_GPGPU-Sim_SharedMemory/benchmark/ispass2009-benchmarks-master/AES/data/key256.txt /home/ccw/Chiplet_GPGPU-Sim_SharedMemory/benchmark/ispass2009-benchmarks-master/AES/data/key256.txt &");
 	else if(strcmp("BFS",argv[i])==0)
         system("cd ../ispass2009-benchmarks-master/BFS && nohup ../ispass2009-benchmarks-master/bin/release/BFS ../ispass2009-benchmarks-master/BFS/data/graph65536.txt &");
 	else if(strcmp("CP",argv[i])==0)
@@ -194,14 +194,14 @@ int i=1;
         else if(strcmp("WP",argv[i])==0)
         system("cd ../ispass2009-benchmarks-master/WP && nohup echo \"10 ./data/\" | ../bin/release/WP &");
 		else if(strcmp("MM",argv[i])==0)
-        system("cd ../ispass2009-benchmarks-master/MM && nohup  ../ispass2009-benchmarks-master/bin/release/MM &");
+        system("cd /home/ccw/Chiplet_GPGPU-Sim_SharedMemory/benchmark/ispass2009-benchmarks-master/MM && nohup /home/ccw/Chiplet_GPGPU-Sim_SharedMemory/benchmark/ispass2009-benchmarks-master/bin/release/MM &");
 	
 	
     }
 
 
 }
-inline void pidChipID_writeFile(int pid_t_i,int benchmark){
+void pidChipID_writeFile(int pid_t_i){
      FILE * fp_out;
      if((fp_out=fopen("pidChipMap.txt","a"))==NULL){
           printf("Cannot open this file");
@@ -259,7 +259,7 @@ void pidChipID_map(int argc,char * argv[]){
 		if(mark==0){	
 			char cmd[256];
 			//char cmd2[256];
-			sprintf(cmd, "ps -ef | grep \"%s\" |grep -v grep | grep -v \"./S\" |awk '{print $2}' >>pidChipMap.txt", argv[i]);
+			sprintf(cmd, "ps -ef | grep \"master/bin/release/%s\" |grep -v grep | grep -v \"./S\" |awk '{print $2}' >>pidChipMap.txt", argv[i]);
 			//sprintf(cmd2, "ps -ef | grep \"%s\" |grep -v grep | grep -v \"./S\"", argv[i]);
 			system(cmd);
 			//system(cmd2);
@@ -270,9 +270,9 @@ void pidChipID_map(int argc,char * argv[]){
 
 void initial_synchronization(){
 	
-	system("cd ../workspace/synchronization && rm ../workspace/synchronization/synchronization.txt && touch ../workspace/synchronization/synchronization.txt");
-	char filename_string[64];
-	strcpy (filename_string,"../workspace/synchronization/");
+	system("cd /home/ccw/Chiplet_GPGPU-Sim_SharedMemory/benchmark/ispass2009-benchmarks-master/MM/synchronization && rm /home/ccw/Chiplet_GPGPU-Sim_SharedMemory/benchmark/ispass2009-benchmarks-master/MM/synchronization/synchronization.txt && touch /home/ccw/Chiplet_GPGPU-Sim_SharedMemory/benchmark/ispass2009-benchmarks-master/MM/synchronization/synchronization.txt");
+	char filename_string[128];
+	strcpy (filename_string,"/home/ccw/Chiplet_GPGPU-Sim_SharedMemory/benchmark/ispass2009-benchmarks-master/MM/synchronization/");
 	strcat (filename_string,"synchronization.txt");	
 	char string_newSynTime[10];
 	sprintf(string_newSynTime, "%d", 2000);
@@ -284,7 +284,7 @@ void initial_synchronization(){
 
 }
 
-inline void numOfChip_writeFile(int numOfChip){
+void numOfChip_writeFile(int numOfChip){
      
      FILE * fp_out;
      if((fp_out=fopen("numOfChip.txt","w"))==NULL){
@@ -340,11 +340,12 @@ int main(int argc,char * argv[]){
     numOfChip_writeFile(argc-2);
     createProcess(argc-1,argv);
     pidChipID_map(argc-1,argv);
-    topology(argv[argc-1],argc-1);
+    topology(argv[argc-1],argc-2);
     initial_synchronization();
    // popnet_trans(argc-1,argv);
+    return 0;
 }
-
+/*
 int find_pid_by_name( char* ProcName, int* foundpid)
 {
         DIR             *dir;
@@ -357,7 +358,7 @@ int find_pid_by_name( char* ProcName, int* foundpid)
         foundpid[0] = 0;
         pnlen = strlen(ProcName);
  
-        /* Open the /proc directory. */
+        // Open the /proc directory. 
         dir = opendir("/proc");
         if (!dir)
         {
@@ -365,7 +366,7 @@ int find_pid_by_name( char* ProcName, int* foundpid)
                 return -1;
         }
  
-        /* Walk through the directory. */
+        // Walk through the directory. 
         while ((d = readdir(dir)) != NULL) {
  
                 char exe [PATH_MAX+1];
@@ -373,7 +374,7 @@ int find_pid_by_name( char* ProcName, int* foundpid)
                 int len;
                 int namelen;
  
-                /* See if this is a process */
+                // See if this is a process 
                 if ((pid = atoi(d->d_name)) == 0)       continue;
  
                 snprintf(exe, sizeof(exe), "/proc/%s/exe", d->d_name);
@@ -381,17 +382,17 @@ int find_pid_by_name( char* ProcName, int* foundpid)
                         continue;
                 path[len] = '\0';
  
-                /* Find ProcName */
+                // Find ProcName 
                 s = strrchr(path, '/');
                 if(s == NULL) continue;
                 s++;
  
-                /* we don't need small name len */
+                // we don't need small name len 
                 namelen = strlen(s);
                 if(namelen < pnlen)     continue;
  
                 if(!strncmp(ProcName, s, pnlen)) {
-                        /* to avoid subname like search proc tao but proc taolinke matched */
+                        // to avoid subname like search proc tao but proc taolinke matched 
                         if(s[pnlen] == ' ' || s[pnlen] == '\0') {
                                 foundpid[i] = pid;
                                 i++;
@@ -404,4 +405,4 @@ int find_pid_by_name( char* ProcName, int* foundpid)
  
         return  0;
  
-}
+}*/
